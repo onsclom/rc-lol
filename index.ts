@@ -1,3 +1,5 @@
+const landingPage = Bun.file("./landing-page.html");
+
 interface Command {
   keyword: string;
   handler: (args?: string[]) => string;
@@ -23,6 +25,7 @@ const port = process.env.PORT ?? 3000;
 
 Bun.serve({
   port,
+  development: process.env.DEV ? true : false,
   routes: {
     "/": {
       async GET(req) {
@@ -30,7 +33,7 @@ Bun.serve({
         const query = queryParams.get("q");
 
         if (!query) {
-          return Response.json({});
+          return new Response(landingPage);
         }
 
         const [keyword, ...args] = query.split(" ");

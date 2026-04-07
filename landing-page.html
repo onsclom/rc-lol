@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RC Search - Custom Search Engine for Recurse Center</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #1a1a1a;
+      background: #fafafa;
+      line-height: 1.6;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #1a8c44 0%, #23a050 100%);
+      color: white;
+      padding: 4rem 2rem;
+      text-align: center;
+    }
+
+    .hero h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .hero p {
+      font-size: 1.15rem;
+      opacity: 0.9;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      margin: 2.5rem 0 1rem;
+      color: #23a050;
+    }
+
+    .commands {
+      display: grid;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .command {
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: baseline;
+      gap: 1rem;
+    }
+
+    .command code {
+      background: #23a050;
+      color: white;
+      padding: 0.2em 0.6em;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .command span {
+      color: #444;
+      font-size: 0.95rem;
+    }
+
+    .steps {
+      counter-reset: step;
+      list-style: none;
+      display: grid;
+      gap: 1.25rem;
+    }
+
+    .step {
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 10px;
+      padding: 1.5rem 1.5rem 1.5rem 4.5rem;
+      position: relative;
+    }
+
+    .step::before {
+      counter-increment: step;
+      content: counter(step);
+      position: absolute;
+      left: 1.25rem;
+      top: 1.35rem;
+      width: 2rem;
+      height: 2rem;
+      background: #23a050;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .step h3 {
+      font-size: 1.05rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .step p {
+      color: #444;
+      font-size: 0.93rem;
+    }
+
+    .copy-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .copy-row .url {
+      flex: 1;
+      background: #f3f3f3;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 0.4em 0.75em;
+      font-family: monospace;
+      font-size: 0.85rem;
+      word-break: break-all;
+      user-select: all;
+      cursor: text;
+    }
+
+    .copy-btn {
+      background: #23a050;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 0.45em 0.9em;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.15s;
+    }
+
+    .copy-btn:hover {
+      background: #1e8a45;
+    }
+
+    .copy-btn.copied {
+      background: #666;
+    }
+
+    .browsers {
+      margin-top: 1.25rem;
+    }
+
+    .browser-section {
+      margin-bottom: 1.5rem;
+    }
+
+    .browser-section h3 {
+      font-size: 1rem;
+      margin-bottom: 0.4rem;
+      color: #333;
+    }
+
+    .browser-section ol {
+      padding-left: 1.25rem;
+      color: #444;
+      font-size: 0.93rem;
+    }
+
+    .browser-section li {
+      margin-bottom: 0.25rem;
+    }
+
+    .browser-section li code {
+      background: #f3f3f3;
+      padding: 0.15em 0.4em;
+      border-radius: 3px;
+      font-size: 0.85rem;
+    }
+
+    .try-it {
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 10px;
+      padding: 1.5rem;
+      text-align: center;
+      margin-top: 2rem;
+    }
+
+    .try-it input {
+      width: 100%;
+      max-width: 400px;
+      padding: 0.6rem 1rem;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      font-size: 1rem;
+      margin-top: 0.75rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .try-it input:focus {
+      border-color: #23a050;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: #999;
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="hero">
+    <h1>RC Search</h1>
+    <p>A custom search engine with shortcuts for Recurse Center tools. Add it to your browser for quick access.</p>
+  </div>
+
+  <div class="container">
+
+    <h2>Available Commands</h2>
+    <div class="commands">
+      <div class="command">
+        <code>cal</code>
+        <span>Jump straight to the RC calendar</span>
+      </div>
+      <div class="command">
+        <code>z</code>
+        <span>Open Zulip &mdash; or <strong>z your search</strong> to search Zulip directly</span>
+      </div>
+      <div class="command">
+        <code>anything else</code>
+        <span>Falls through to a Google search</span>
+      </div>
+    </div>
+
+    <div class="try-it">
+      <strong>Try it out</strong>
+      <form action="/" method="get">
+        <input type="text" name="q" placeholder='Type a command, e.g. "cal" or "z borrow checker"' autofocus />
+      </form>
+    </div>
+
+    <h2>Setup</h2>
+    <ol class="steps">
+      <li class="step">
+        <h3>Copy the search URL</h3>
+        <p>You'll need this URL to configure your browser. It tells the browser where to send your searches.</p>
+        <div class="copy-row">
+          <span class="url" id="search-url"></span>
+          <button class="copy-btn" id="copy-url-btn" onclick="copyUrl()">Copy</button>
+        </div>
+      </li>
+      <li class="step">
+        <h3>Add it as a custom search engine</h3>
+        <p>Pick your browser below and follow the steps.</p>
+        <div class="browsers">
+          <div class="browser-section">
+            <h3>Chrome / Brave / Edge</h3>
+            <ol>
+              <li>Go to <code>Settings &rarr; Search engine &rarr; Manage search engines</code></li>
+              <li>Click <strong>Add</strong> under "Site search"</li>
+              <li>Set the name to <strong>RC Search</strong> and the shortcut to whatever you like (e.g. <code>rc</code>)</li>
+              <li>Paste the copied URL into the <strong>URL</strong> field</li>
+              <li>Save</li>
+            </ol>
+          </div>
+          <div class="browser-section">
+            <h3>Firefox</h3>
+            <ol>
+              <li>Install the <strong>Add custom search engine</strong> extension</li>
+              <li>Set the search URL to the copied URL</li>
+              <li>Give it a name and save</li>
+            </ol>
+          </div>
+          <div class="browser-section">
+            <h3>Safari</h3>
+            <ol>
+              <li>Safari doesn't support custom search engines natively</li>
+              <li>Use an extension like <strong>xSearch</strong> from the App Store</li>
+              <li>Configure it with the copied URL</li>
+            </ol>
+          </div>
+          <div class="browser-section">
+            <h3>Arc</h3>
+            <ol>
+              <li>Open <code>Settings &rarr; Search</code></li>
+              <li>Click <strong>Add Search Engine</strong></li>
+              <li>Paste the copied URL and save</li>
+            </ol>
+          </div>
+        </div>
+      </li>
+      <li class="step">
+        <h3>Use it</h3>
+        <p>Type your shortcut keyword (e.g. <code>rc</code>) in the address bar, press Tab or Space, then type your query. Your browser will send it here and you'll be redirected to the right place.</p>
+      </li>
+    </ol>
+
+  </div>
+
+  <footer>RC Search &mdash; built at the Recurse Center</footer>
+
+  <script>
+    const searchUrl = window.location.origin + "/?q=%s";
+    document.getElementById("search-url").textContent = searchUrl;
+
+    function copyUrl() {
+      const btn = document.getElementById("copy-url-btn");
+      navigator.clipboard.writeText(searchUrl).then(() => {
+        btn.textContent = "Copied!";
+        btn.classList.add("copied");
+        setTimeout(() => {
+          btn.textContent = "Copy";
+          btn.classList.remove("copied");
+        }, 2000);
+      });
+    }
+  </script>
+</body>
+</html>
