@@ -19,8 +19,10 @@ const registry: Command[] = [
   },
 ];
 
+const port = process.env.PORT ?? 3000;
+
 Bun.serve({
-  port: 3000,
+  port,
   routes: {
     "/": {
       async GET(req) {
@@ -47,4 +49,6 @@ Bun.serve({
   },
 });
 
-console.log("Server running on http://localhost:3000");
+if (process.env.DEV) {
+  console.log(`Server running on http://localhost:${port}`);
+}
