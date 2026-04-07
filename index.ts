@@ -3,6 +3,7 @@ const landingPage = Bun.file("./landing-page.html");
 interface Command {
   keyword: string;
   aliases?: string[];
+  description: string;
   handler: (args?: string[]) => string;
 }
 
@@ -10,11 +11,14 @@ const registry: Command[] = [
   {
     keyword: "calendar",
     aliases: ["cal"],
+    description: "Jump straight to the RC calendar",
     handler: () => "https://www.recurse.com/calendar",
   },
   {
     keyword: "zulip",
     aliases: ["z"],
+    description:
+      "Open Zulip &mdash; or <strong>z your search</strong> to search directly",
     handler: (args) => {
       if (!args || args?.length == 0) {
         return "https://recurse.zulipchat.com";
@@ -25,32 +29,56 @@ const registry: Command[] = [
   {
     keyword: "library",
     aliases: ["lib"],
+    description: "Browse the RC library catalog",
     handler: () => "https://www.libib.com/u/recursecenter",
   },
   {
     keyword: "wiki",
+    description: "Open the RC wiki on GitHub",
     handler: () => "https://github.com/recursecenter/wiki/wiki",
   },
   {
     keyword: "community",
     aliases: ["forum"],
+    description: "Open the RC community forum",
     handler: () => "https://community.recurse.com",
   },
   {
     keyword: "phoneroom",
     aliases: ["phone"],
+    description: "Open the RC phone room",
     handler: () => "https://phoneroom.recurse.com",
   },
   {
     keyword: "rapidriter",
     aliases: ["rr"],
+    description: "Open Rapid Riter",
     handler: () => "https://rapidriter.rcdis.co",
   },
   {
     keyword: "rcade",
+    description: "Open RCade",
     handler: () => "https://rcade.dev",
   },
 ];
+
+function generateCommandsHtml(): string {
+  const cards = registry
+    .map((cmd) => {
+      const label = cmd.aliases ? cmd.aliases[0] : cmd.keyword;
+      return `        <div class="command">
+          <code>${label}</code>
+          <span>${cmd.description}</span>
+        </div>`;
+    })
+    .join("\n");
+
+  return `${cards}
+        <div class="command">
+          <code>anything else</code>
+          <span>Falls through to a Google search</span>
+        </div>`;
+}
 
 const port = process.env.PORT ?? 3000;
 
@@ -64,7 +92,13 @@ Bun.serve({
         const query = queryParams.get("q");
 
         if (!query) {
-          return new Response(landingPage);
+          const html = (await landingPage.text()).replace(
+            "<!--COMMANDS-->",
+            generateCommandsHtml(),
+          );
+          return new Response(html, {
+            headers: { "Content-Type": "text/html" },
+          });
         }
 
         const [keyword, ...args] = query.split(" ");
