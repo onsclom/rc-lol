@@ -60,6 +60,12 @@ const registry: Command[] = [
     description: "Open RCade",
     handler: () => "https://rcade.dev",
   },
+  {
+    keyword: "virtualrc",
+    aliases: ["vrc"],
+    description: "Open Virtual RC",
+    handler: () => "https://recurse.rctogether.com/",
+  },
 ];
 
 function generateCommandsHtml(): string {
