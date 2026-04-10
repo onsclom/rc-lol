@@ -1,82 +1,13 @@
-import { streamText } from 'ai';
-import { cohere } from '@ai-sdk/cohere';
-
 const landingPage = Bun.file("./landing-page.html");
 
 interface Command {
   keyword: string;
   aliases?: string[];
   description: string;
-  handler: (args?: string[]) => string | Promise<Response> | Response;
+  handler: (args?: string[]) => string;
 }
 
 const registry: Command[] = [
-  {
-    keyword: "ask",
-    description: "Ask an AI a question (powered by Cohere)",
-    handler: async (args) => {
-      const query = args?.join(" ") || "Hello!";
-      const result = await streamText({
-        model: cohere("command-a-03-2025"),
-        prompt: query,
-      });
-
-      const stream = new ReadableStream({
-        async start(controller) {
-          const encoder = new TextEncoder();
-          controller.enqueue(encoder.encode(`<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RC Search - Ask AI</title>
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: #1a1a1a; background: #fafafa; line-height: 1.6; margin: 0; }
-    .container { max-width: 720px; margin: 0 auto; padding: 4rem 1.5rem; }
-    .query { font-size: 1.25rem; font-weight: 600; margin-bottom: 2rem; color: #1a8c44; }
-    .response { background: white; border: 1px solid #e0e0e0; border-radius: 10px; padding: 1.5rem; font-size: 1.05rem; }
-    .response p:first-child { margin-top: 0; }
-    .response p:last-child { margin-bottom: 0; }
-    .response pre { background: #1a1a1a; color: #f4f4f4; padding: 1rem; overflow-x: auto; border-radius: 6px; }
-    .response code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; background: #f0f0f0; padding: 0.2em 0.4em; border-radius: 3px; font-size: 0.9em; }
-    .response pre code { background: transparent; padding: 0; color: inherit; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="query">Q: ${query}</div>
-    <div class="response" id="content"><em>Thinking...</em></div>
-  </div>
-  <script>
-    let fullText = "";
-    function append(text) {
-      if (fullText === "") document.getElementById("content").innerHTML = "";
-      fullText += text;
-      document.getElementById("content").innerHTML = marked.parse(fullText);
-    }
-  </script>`));
-
-          try {
-            for await (const chunk of result.textStream) {
-              const safeChunk = JSON.stringify(chunk).replace(/</g, '\\u003c');
-              controller.enqueue(encoder.encode(`\n<script>append(${safeChunk});</script>`));
-            }
-          } catch (e) {
-            const safeError = JSON.stringify(`\n\n[Error: ${e}]`).replace(/</g, '\\u003c');
-            controller.enqueue(encoder.encode(`\n<script>append(${safeError});</script>`));
-          }
-
-          controller.enqueue(encoder.encode(`\n</body>\n</html>`));
-          controller.close();
-        }
-      });
-
-      return new Response(stream, {
-        headers: { "Content-Type": "text/html; charset=utf-8" },
-      });
-    },
-  },
   {
     keyword: "calendar",
     aliases: ["cal"],
@@ -184,11 +115,7 @@ Bun.serve({
             )
           : null;
         if (cmd) {
-          const result = await cmd.handler(args);
-          if (typeof result === "string") {
-            return Response.redirect(result, 302);
-          }
-          return result;
+          return Response.redirect(cmd.handler(args), 302);
         }
 
         return Response.redirect(

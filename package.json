@@ -12,9 +12,5 @@
   "scripts": {
     "dev": "DEV=1 bun --watch index.ts",
     "start": "bun index.ts"
-  },
-  "dependencies": {
-    "@ai-sdk/cohere": "^3.0.29",
-    "ai": "^6.0.150"
   }
 }
